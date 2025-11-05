@@ -297,8 +297,8 @@
         // 進行率を計算（0-1の範囲）
         const progress = timeLeft / totalTime;
 
-        // stroke-dashoffsetを計算（残り時間に応じて減少）
-        const offset = circumference * (1 - progress);
+        // stroke-dashoffsetを計算（時計回りに進行）
+        const offset = circumference * progress;
 
         progressCircle.style.strokeDasharray = circumference;
         progressCircle.style.strokeDashoffset = offset;
