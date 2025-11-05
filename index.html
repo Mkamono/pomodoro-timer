@@ -7,18 +7,30 @@
     <link rel="icon" type="image/png" href="https://emojicdn.elk.sh/🍅" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
-  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
     <div class="w-full max-w-md">
       <!-- メインカード -->
-      <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 transition-colors duration-300">
+        <!-- ダークモード切り替えボタン -->
+        <div class="flex justify-end mb-4">
+          <button
+            id="themeToggle"
+            onclick="toggleTheme()"
+            class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-200"
+            aria-label="テーマ切り替え"
+          >
+            <span id="themeIcon">🌙</span>
+          </button>
+        </div>
+
         <!-- タイトル -->
-        <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-800">
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-800 dark:text-white">
           ポモドーロタイマー
         </h1>
 
         <!-- 初期選択画面 -->
         <div id="initialChoice" class="space-y-4">
-          <p class="text-center text-gray-600 mb-6">何から始めますか？</p>
+          <p class="text-center text-gray-600 dark:text-gray-300 mb-6">何から始めますか？</p>
           <button
             onclick="startWithWork()"
             class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
@@ -45,9 +57,9 @@
 
           <!-- タスク表示エリア -->
           <div id="taskDisplayArea" class="mb-6 hidden">
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-              <p class="text-sm text-gray-600 mb-1">この時間でやること</p>
-              <p id="taskText" class="font-medium text-gray-800"></p>
+            <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 dark:border-blue-400 p-4 rounded">
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">この時間でやること</p>
+              <p id="taskText" class="font-medium text-gray-800 dark:text-gray-200"></p>
             </div>
           </div>
 
@@ -83,13 +95,13 @@
               <div class="absolute inset-0 flex items-center justify-center">
                 <div
                   id="timerDisplay"
-                  class="text-5xl md:text-6xl font-bold text-gray-800 font-mono"
+                  class="text-5xl md:text-6xl font-bold text-gray-800 dark:text-white font-mono"
                 >
                   25:00
                 </div>
               </div>
             </div>
-            <div class="text-sm text-gray-500 mt-4">
+            <div class="text-sm text-gray-500 dark:text-gray-400 mt-4">
               サイクル: <span id="cycleCount">1</span>
             </div>
           </div>
@@ -119,28 +131,28 @@
           </div>
 
           <!-- 次のセッション表示 -->
-          <div class="text-center text-sm text-gray-600">
+          <div class="text-center text-sm text-gray-600 dark:text-gray-400">
             次: <span id="nextSession"></span>
           </div>
         </div>
       </div>
 
       <!-- フッター -->
-      <div class="text-center mt-6 text-gray-600 text-sm">
+      <div class="text-center mt-6 text-gray-600 dark:text-gray-400 text-sm">
         作業25分 → 休憩5分を繰り返します
       </div>
     </div>
 
     <!-- タスク入力モーダル -->
-    <div id="taskModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">この時間でやること</h2>
-        <p class="text-sm text-gray-600 mb-4">タスクを入力してください（任意）</p>
+    <div id="taskModal" class="hidden fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">この時間でやること</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">タスクを入力してください（任意）</p>
         <input
           type="text"
           id="modalTaskInput"
           placeholder="例: レポート作成、コーディング、資料読み込み..."
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-6"
+          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-6"
           onkeypress="if(event.key === 'Enter') confirmTask()"
         />
         <div class="flex gap-3">
@@ -152,7 +164,7 @@
           </button>
           <button
             onclick="skipTaskInput()"
-            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-6 rounded-xl transition duration-200"
+            class="flex-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-white font-bold py-3 px-6 rounded-xl transition duration-200"
           >
             スキップ
           </button>
@@ -161,6 +173,34 @@
     </div>
 
     <script>
+      // ダークモード管理
+      function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+          document.documentElement.classList.add('dark');
+          updateThemeIcon(true);
+        } else {
+          document.documentElement.classList.remove('dark');
+          updateThemeIcon(false);
+        }
+      }
+
+      function toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateThemeIcon(isDark);
+      }
+
+      function updateThemeIcon(isDark) {
+        const icon = document.getElementById('themeIcon');
+        icon.textContent = isDark ? '☀️' : '🌙';
+      }
+
+      // ページ読み込み時にテーマを初期化
+      initTheme();
+
       // タイマーの状態
       let timerInterval = null;
       let timeLeft = 25 * 60; // 秒単位
