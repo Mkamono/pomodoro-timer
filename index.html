@@ -175,8 +175,13 @@
       // タイマーリセット
       function resetTimer() {
         pauseTimer();
-        timeLeft = currentMode === 'work' ? WORK_TIME : BREAK_TIME;
-        updateDisplay();
+        // タイマービューを非表示にして初期選択画面を表示
+        document.getElementById('timerView').classList.add('hidden');
+        document.getElementById('initialChoice').classList.remove('hidden');
+        // 状態をリセット
+        cycleCount = 1;
+        timeLeft = WORK_TIME;
+        currentMode = 'work';
       }
 
       // モード切り替え
