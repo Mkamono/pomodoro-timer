@@ -26,7 +26,15 @@
       <!-- メインカード -->
       <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 md:p-12 transition-colors duration-300">
         <!-- ダークモード切り替えボタン -->
-        <div class="flex justify-end mb-3">
+        <div class="flex justify-end gap-2 mb-3">
+          <button
+            id="debugToggle"
+            onclick="toggleDebugMode()"
+            class="p-2 rounded-lg bg-orange-200 dark:bg-orange-700 hover:bg-orange-300 dark:hover:bg-orange-600 transition duration-200"
+            aria-label="デバッグモード切り替え"
+          >
+            <span id="debugIcon">🔧</span>
+          </button>
           <button
             id="themeToggle"
             onclick="toggleTheme()"
@@ -49,13 +57,13 @@
             onclick="startWithWork()"
             class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
           >
-            🎯 作業から開始 (25分)
+            <span id="workButtonText">🎯 作業から開始 (25分)</span>
           </button>
           <button
             onclick="startWithBreak()"
             class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
           >
-            ☕ 休憩から開始 (5分)
+            <span id="breakButtonText">☕ 休憩から開始 (5分)</span>
           </button>
         </div>
 
@@ -153,13 +161,13 @@
 
       <!-- フッター -->
       <div class="text-center mt-4 text-gray-600 dark:text-gray-400 text-sm">
-        作業25分 → 休憩5分を繰り返します
+        <span id="footerText">作業25分 → 休憩5分を繰り返します</span>
       </div>
     </div>
 
     <!-- タスク入力モーダル -->
-    <div id="taskModal" class="hidden fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50" onclick="handleModalBackgroundClick(event)">
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full" onclick="event.stopPropagation()">
+    <div id="taskModal" class="hidden fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-start justify-center p-4 z-50 overflow-y-auto" onclick="handleModalBackgroundClick(event)">
+      <div id="taskModalContent" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full my-auto transition-transform duration-300" onclick="event.stopPropagation()">
         <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">この時間でやること</h2>
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">タスクを入力してください（任意）<span class="text-xs ml-2">(Escキーでスキップ)</span></p>
         <input
@@ -168,6 +176,8 @@
           placeholder="例: レポート作成、コーディング、資料読み込み..."
           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-6"
           onkeydown="handleModalKeyDown(event)"
+          onfocus="handleInputFocus()"
+          onblur="handleInputBlur()"
         />
         <button
           onclick="confirmTask()"
@@ -204,8 +214,160 @@
         icon.textContent = isDark ? '☀️' : '🌙';
       }
 
+      // デバッグモード管理
+      function toggleDebugMode() {
+        isDebugMode = !isDebugMode;
+        updateDebugIcon();
+        updateDebugUI();
+      }
+
+      function updateDebugIcon() {
+        const icon = document.getElementById('debugIcon');
+        icon.textContent = isDebugMode ? '🐛' : '🔧';
+      }
+
+      function updateDebugUI() {
+        const workButtonText = document.getElementById('workButtonText');
+        const breakButtonText = document.getElementById('breakButtonText');
+        const footerText = document.getElementById('footerText');
+
+        if (isDebugMode) {
+          workButtonText.textContent = '🎯 作業から開始 (10秒)';
+          breakButtonText.textContent = '☕ 休憩から開始 (5秒)';
+          footerText.textContent = 'デバッグモード: 作業10秒 → 休憩5秒';
+        } else {
+          workButtonText.textContent = '🎯 作業から開始 (25分)';
+          breakButtonText.textContent = '☕ 休憩から開始 (5分)';
+          footerText.textContent = '作業25分 → 休憩5分を繰り返します';
+        }
+      }
+
+      function getWorkTime() {
+        return isDebugMode ? DEBUG_WORK_TIME : WORK_TIME;
+      }
+
+      function getBreakTime() {
+        return isDebugMode ? DEBUG_BREAK_TIME : BREAK_TIME;
+      }
+
+      // Screen Wake Lock管理
+      async function requestWakeLock() {
+        try {
+          if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Wake Lock有効化');
+
+            wakeLock.addEventListener('release', () => {
+              console.log('Wake Lock解除');
+            });
+          }
+        } catch (error) {
+          console.warn('Wake Lock取得に失敗:', error);
+        }
+      }
+
+      async function releaseWakeLock() {
+        if (wakeLock) {
+          try {
+            await wakeLock.release();
+            wakeLock = null;
+            console.log('Wake Lock手動解除');
+          } catch (error) {
+            console.warn('Wake Lock解除に失敗:', error);
+          }
+        }
+      }
+
+      // ページの可視性変更時にWake Lockを再取得
+      document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible' && isRunning) {
+          await requestWakeLock();
+        }
+      });
+
+      // キーボード表示/非表示の検出とモーダル位置調整
+      function setupKeyboardHandling() {
+        // Visual Viewport APIを使用（サポートされている場合）
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('resize', handleViewportResize);
+        } else {
+          // フォールバック: windowのresizeイベント
+          window.addEventListener('resize', handleViewportResize);
+        }
+      }
+
+      function handleViewportResize() {
+        const taskModal = document.getElementById('taskModal');
+        const modalContent = document.getElementById('taskModalContent');
+
+        if (!taskModal.classList.contains('hidden')) {
+          const viewport = window.visualViewport || window;
+          const viewportHeight = viewport.height || window.innerHeight;
+          const windowHeight = window.screen.height;
+
+          // キーボードが表示されているかを判定（ビューポートが大幅に小さくなった場合）
+          const heightRatio = viewportHeight / windowHeight;
+          const wasKeyboardVisible = keyboardVisible;
+          keyboardVisible = heightRatio < 0.75; // 75%以下になったらキーボード表示と判定
+
+          if (keyboardVisible && !wasKeyboardVisible) {
+            // キーボード表示開始
+            adjustModalForKeyboard();
+          } else if (!keyboardVisible && wasKeyboardVisible) {
+            // キーボード非表示
+            resetModalPosition();
+          }
+        }
+      }
+
+      function adjustModalForKeyboard() {
+        const taskModal = document.getElementById('taskModal');
+        const modalContent = document.getElementById('taskModalContent');
+        const input = document.getElementById('modalTaskInput');
+
+        // モーダルを上部に配置
+        taskModal.classList.remove('items-start');
+        taskModal.classList.add('items-start');
+        modalContent.classList.remove('my-auto');
+        modalContent.classList.add('mt-4');
+
+        // 入力欄が見えるように調整
+        setTimeout(() => {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+
+      function resetModalPosition() {
+        const taskModal = document.getElementById('taskModal');
+        const modalContent = document.getElementById('taskModalContent');
+
+        // モーダル位置をリセット
+        taskModal.classList.remove('items-start');
+        taskModal.classList.add('items-start');
+        modalContent.classList.remove('mt-4');
+        modalContent.classList.add('my-auto');
+      }
+
+      // 入力フィールドのフォーカス・ブラー処理
+      function handleInputFocus() {
+        // フォーカス時は少し遅延してからスクロール調整
+        setTimeout(() => {
+          const input = document.getElementById('modalTaskInput');
+          if (input) {
+            input.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+          }
+        }, 300);
+      }
+
+      function handleInputBlur() {
+        // ブラー時は特に何もしない（キーボードが閉じるのを待つ）
+      }
+
       // ページ読み込み時にテーマを初期化
       initTheme();
+
+      // キーボード処理の初期化
+      setupKeyboardHandling();
 
       // Service Workerの登録（PWA対応）
       if ('serviceWorker' in navigator) {
@@ -227,9 +389,15 @@
       let currentMode = 'work'; // 'work' or 'break'
       let cycleCount = 1;
       let currentTask = ''; // 現在のタスク
+      let isDebugMode = false; // デバッグモード
+      let wakeLock = null; // Screen Wake Lock
+      let keyboardVisible = false; // キーボード表示状態
+      let originalModalPosition = null; // モーダルの元の位置
 
       const WORK_TIME = 25 * 60; // 25分
       const BREAK_TIME = 5 * 60; // 5分
+      const DEBUG_WORK_TIME = 10; // デバッグ: 10秒
+      const DEBUG_BREAK_TIME = 5; // デバッグ: 5秒
       const PROGRESS_RADIUS = 100; // プログレスサークルの半径
 
       // AudioContextを再利用（メモリリーク防止）
@@ -267,12 +435,22 @@
         const modalInput = document.getElementById('modalTaskInput');
         modal.classList.remove('hidden');
         modalInput.value = '';
-        modalInput.focus();
+
+        // キーボード状態をリセット
+        keyboardVisible = false;
+        resetModalPosition();
+
+        // 少し遅延してからフォーカス（iOS対応）
+        setTimeout(() => {
+          modalInput.focus();
+        }, 100);
       }
 
       // モーダルを非表示
       function hideTaskModal() {
         document.getElementById('taskModal').classList.add('hidden');
+        // キーボード状態をリセット
+        keyboardVisible = false;
       }
 
       // モーダルのキーボードイベント処理
@@ -314,7 +492,7 @@
       // タイマー初期化（共通処理）
       function initializeTimer(mode) {
         currentMode = mode;
-        timeLeft = mode === 'work' ? WORK_TIME : BREAK_TIME;
+        timeLeft = mode === 'work' ? getWorkTime() : getBreakTime();
         document.getElementById('initialChoice').classList.add('hidden');
         document.getElementById('timerView').classList.remove('hidden');
         updateDisplay();
@@ -340,6 +518,9 @@
           document.getElementById('startButton').classList.add('hidden');
           document.getElementById('pauseButton').classList.remove('hidden');
 
+          // Wake Lockを有効化
+          requestWakeLock();
+
           timerInterval = setInterval(() => {
             timeLeft--;
 
@@ -361,17 +542,23 @@
         }
         document.getElementById('startButton').classList.remove('hidden');
         document.getElementById('pauseButton').classList.add('hidden');
+
+        // Wake Lockを解除
+        releaseWakeLock();
       }
 
       // タイマーリセット
       function resetTimer() {
         pauseTimer();
+        // Wake Lockを確実に解除
+        releaseWakeLock();
+
         // タイマービューを非表示にして初期選択画面を表示
         document.getElementById('timerView').classList.add('hidden');
         document.getElementById('initialChoice').classList.remove('hidden');
         // 状態をリセット
         cycleCount = 1;
-        timeLeft = WORK_TIME;
+        timeLeft = getWorkTime();
         currentMode = 'work';
         currentTask = '';
         // タスク表示をクリア
@@ -385,14 +572,14 @@
         if (currentMode === 'work') {
           // 作業→休憩
           currentMode = 'break';
-          timeLeft = BREAK_TIME;
+          timeLeft = getBreakTime();
           updateDisplay();
           // 休憩は自動継続（モーダルなし）
         } else {
           // 休憩→作業
           pauseTimer(); // タイマーを一時停止
           currentMode = 'work';
-          timeLeft = WORK_TIME;
+          timeLeft = getWorkTime();
           cycleCount++;
           // 新しい作業セッションのためにタスクをリセット
           currentTask = '';
@@ -425,7 +612,7 @@
         // プログレスサークル更新
         const progressCircle = document.getElementById('progressCircle');
         const circumference = 2 * Math.PI * PROGRESS_RADIUS;
-        const totalTime = currentMode === 'work' ? WORK_TIME : BREAK_TIME;
+        const totalTime = currentMode === 'work' ? getWorkTime() : getBreakTime();
         const progress = timeLeft / totalTime;
         const offset = circumference * progress;
         progressCircle.style.strokeDashoffset = offset;
@@ -460,8 +647,10 @@
         }
 
         // 次のセッション
-        document.getElementById('nextSession').textContent =
-          currentMode === 'work' ? '休憩 (5分)' : '作業 (25分)';
+        const nextSessionText = isDebugMode
+          ? (currentMode === 'work' ? '休憩 (5秒)' : '作業 (10秒)')
+          : (currentMode === 'work' ? '休憩 (5分)' : '作業 (25分)');
+        document.getElementById('nextSession').textContent = nextSessionText;
 
         // サイクル数
         document.getElementById('cycleCount').textContent = cycleCount;
