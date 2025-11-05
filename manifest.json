@@ -1,0 +1,63 @@
+{
+  "name": "ポモドーロタイマー",
+  "short_name": "ポモドーロ",
+  "description": "25分の作業と5分の休憩を繰り返すシンプルなポモドーロタイマー",
+  "start_url": "/pomodoro-timer/",
+  "scope": "/pomodoro-timer/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ef4444",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://emojicdn.elk.sh/🍅?size=72",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://emojicdn.elk.sh/🍅?size=96",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://emojicdn.elk.sh/🍅?size=128",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://emojicdn.elk.sh/🍅?size=144",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://emojicdn.elk.sh/🍅?size=152",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://emojicdn.elk.sh/🍅?size=192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://emojicdn.elk.sh/🍅?size=384",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://emojicdn.elk.sh/🍅?size=512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "ja"
+}
