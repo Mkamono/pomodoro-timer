@@ -42,6 +42,22 @@
             ></span>
           </div>
 
+          <!-- タスク入力エリア -->
+          <div id="taskInputArea" class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              この時間でやること
+            </label>
+            <input
+              type="text"
+              id="taskInput"
+              placeholder="例: レポート作成、コーディング、資料読み込み..."
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <div id="currentTask" class="mt-2 text-sm text-gray-600 hidden">
+              現在のタスク: <span id="taskText" class="font-medium text-gray-800"></span>
+            </div>
+          </div>
+
           <!-- タイマー表示 -->
           <div class="text-center mb-8">
             <div
@@ -99,6 +115,7 @@
       let isRunning = false;
       let currentMode = 'work'; // 'work' or 'break'
       let cycleCount = 1;
+      let currentTask = ''; // 現在のタスク
 
       const WORK_TIME = 25 * 60; // 25分
       const BREAK_TIME = 5 * 60; // 5分
@@ -152,6 +169,18 @@
           document.getElementById('startButton').classList.add('hidden');
           document.getElementById('pauseButton').classList.remove('hidden');
 
+          // タスク入力を保存して表示
+          if (currentMode === 'work') {
+            const taskInput = document.getElementById('taskInput');
+            currentTask = taskInput.value.trim();
+            if (currentTask) {
+              document.getElementById('taskText').textContent = currentTask;
+              document.getElementById('currentTask').classList.remove('hidden');
+              taskInput.classList.add('hidden');
+              document.querySelector('label[for="taskInput"]').classList.add('hidden');
+            }
+          }
+
           timerInterval = setInterval(() => {
             timeLeft--;
 
@@ -170,6 +199,15 @@
         clearInterval(timerInterval);
         document.getElementById('startButton').classList.remove('hidden');
         document.getElementById('pauseButton').classList.add('hidden');
+
+        // タスク入力欄を再表示
+        if (currentMode === 'work') {
+          document.getElementById('taskInput').classList.remove('hidden');
+          document.querySelector('label[for="taskInput"]').classList.remove('hidden');
+          if (currentTask) {
+            document.getElementById('currentTask').classList.add('hidden');
+          }
+        }
       }
 
       // タイマーリセット
@@ -182,6 +220,10 @@
         cycleCount = 1;
         timeLeft = WORK_TIME;
         currentMode = 'work';
+        currentTask = '';
+        // タスク入力をクリア
+        document.getElementById('taskInput').value = '';
+        document.getElementById('currentTask').classList.add('hidden');
       }
 
       // モード切り替え
@@ -195,6 +237,12 @@
           currentMode = 'work';
           timeLeft = WORK_TIME;
           cycleCount++;
+          // 新しい作業セッションのためにタスクをリセット
+          currentTask = '';
+          document.getElementById('taskInput').value = '';
+          document.getElementById('taskInput').classList.remove('hidden');
+          document.querySelector('label[for="taskInput"]').classList.remove('hidden');
+          document.getElementById('currentTask').classList.add('hidden');
         }
 
         updateDisplay();
@@ -210,12 +258,16 @@
 
         // モード表示
         const modeDisplay = document.getElementById('modeDisplay');
+        const taskInputArea = document.getElementById('taskInputArea');
+
         if (currentMode === 'work') {
           modeDisplay.textContent = '🎯 作業時間';
           modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-red-500';
+          taskInputArea.classList.remove('hidden');
         } else {
           modeDisplay.textContent = '☕ 休憩時間';
           modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-green-500';
+          taskInputArea.classList.add('hidden');
         }
 
         // 次のセッション
