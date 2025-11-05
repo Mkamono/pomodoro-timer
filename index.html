@@ -4,7 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ポモドーロタイマー</title>
+    <meta name="description" content="25分の作業と5分の休憩を繰り返すシンプルなポモドーロタイマー" />
+
+    <!-- PWA対応 -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#ef4444" />
+
+    <!-- アイコン -->
     <link rel="icon" type="image/png" href="https://emojicdn.elk.sh/🍅" />
+    <link rel="apple-touch-icon" href="https://emojicdn.elk.sh/🍅?size=180" />
+
+    <!-- iOS PWA対応 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ポモドーロ" />
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
   <body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
@@ -192,6 +206,19 @@
 
       // ページ読み込み時にテーマを初期化
       initTheme();
+
+      // Service Workerの登録（PWA対応）
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/pomodoro-timer/service-worker.js')
+            .then((registration) => {
+              console.log('Service Worker登録成功:', registration.scope);
+            })
+            .catch((error) => {
+              console.log('Service Worker登録失敗:', error);
+            });
+        });
+      }
 
       // タイマーの状態
       let timerInterval = null;
