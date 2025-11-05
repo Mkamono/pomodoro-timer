@@ -44,13 +44,43 @@
 
           <!-- タイマー表示 -->
           <div class="text-center mb-8">
-            <div
-              id="timerDisplay"
-              class="text-6xl md:text-7xl font-bold text-gray-800 mb-4 font-mono"
-            >
-              25:00
+            <!-- プログレスサークルとタイマー -->
+            <div class="relative inline-block">
+              <!-- SVGサークル -->
+              <svg class="transform -rotate-90" width="280" height="280">
+                <!-- 背景サークル -->
+                <circle
+                  cx="140"
+                  cy="140"
+                  r="120"
+                  stroke="#e5e7eb"
+                  stroke-width="12"
+                  fill="none"
+                />
+                <!-- プログレスサークル -->
+                <circle
+                  id="progressCircle"
+                  cx="140"
+                  cy="140"
+                  r="120"
+                  stroke="#3b82f6"
+                  stroke-width="12"
+                  fill="none"
+                  stroke-linecap="round"
+                  style="transition: stroke-dashoffset 0.5s ease, stroke 0.3s ease;"
+                />
+              </svg>
+              <!-- タイマー時間表示（サークルの中央） -->
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div
+                  id="timerDisplay"
+                  class="text-5xl md:text-6xl font-bold text-gray-800 font-mono"
+                >
+                  25:00
+                </div>
+              </div>
             </div>
-            <div class="text-sm text-gray-500">
+            <div class="text-sm text-gray-500 mt-4">
               サイクル: <span id="cycleCount">1</span>
             </div>
           </div>
@@ -208,14 +238,33 @@
         document.getElementById('timerDisplay').textContent =
           `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
+        // プログレスサークル更新
+        const progressCircle = document.getElementById('progressCircle');
+        const radius = 120;
+        const circumference = 2 * Math.PI * radius; // 円周
+
+        // 現在のモードに応じた総時間を取得
+        const totalTime = currentMode === 'work' ? WORK_TIME : BREAK_TIME;
+
+        // 進行率を計算（0-1の範囲）
+        const progress = timeLeft / totalTime;
+
+        // stroke-dashoffsetを計算（残り時間に応じて減少）
+        const offset = circumference * (1 - progress);
+
+        progressCircle.style.strokeDasharray = circumference;
+        progressCircle.style.strokeDashoffset = offset;
+
         // モード表示
         const modeDisplay = document.getElementById('modeDisplay');
         if (currentMode === 'work') {
           modeDisplay.textContent = '🎯 作業時間';
           modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-red-500';
+          progressCircle.style.stroke = '#ef4444'; // 赤色（作業時間）
         } else {
           modeDisplay.textContent = '☕ 休憩時間';
           modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-green-500';
+          progressCircle.style.stroke = '#22c55e'; // 緑色（休憩時間）
         }
 
         // 次のセッション
