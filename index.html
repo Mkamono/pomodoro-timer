@@ -1,10 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ポモドーロタイマー</title>
-    <meta name="description" content="25分の作業と5分の休憩を繰り返すシンプルなポモドーロタイマー" />
 
     <!-- PWA対応 -->
     <link rel="manifest" href="manifest.json" />
@@ -19,642 +18,630 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="ポモドーロ" />
 
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  </head>
-  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 h-[100dvh] overflow-hidden flex items-center justify-center py-2 px-4 transition-colors duration-300">
-    <div class="w-full max-w-md">
-      <!-- メインカード -->
-      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 md:p-12 transition-colors duration-300">
-        <!-- ダークモード切り替えボタン -->
-        <div class="flex justify-end gap-2 mb-3">
-          <button
-            id="debugToggle"
-            onclick="toggleDebugMode()"
-            class="p-2 rounded-lg bg-orange-200 dark:bg-orange-700 hover:bg-orange-300 dark:hover:bg-orange-600 transition duration-200"
-            aria-label="デバッグモード切り替え"
-          >
-            <span id="debugIcon">🔧</span>
-          </button>
-          <button
-            id="themeToggle"
-            onclick="toggleTheme()"
-            class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-200"
-            aria-label="テーマ切り替え"
-          >
-            <span id="themeIcon">🌙</span>
-          </button>
-        </div>
 
-        <!-- タイトル -->
-        <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800 dark:text-white">
-          ポモドーロタイマー
-        </h1>
-
-        <!-- 初期選択画面 -->
-        <div id="initialChoice" class="space-y-4">
-          <p class="text-center text-gray-600 dark:text-gray-300 mb-6">何から始めますか？</p>
-          <button
-            onclick="startWithWork()"
-            class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
-          >
-            <span id="workButtonText">🎯 作業から開始 (25分)</span>
-          </button>
-          <button
-            onclick="startWithBreak()"
-            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
-          >
-            <span id="breakButtonText">☕ 休憩から開始 (5分)</span>
-          </button>
-        </div>
-
-        <!-- タイマー画面 -->
-        <div id="timerView" class="hidden">
-          <!-- 現在のモード表示 -->
-          <div class="text-center mb-4">
-            <span
-              id="modeDisplay"
-              class="inline-block px-6 py-2 rounded-full text-white font-bold text-lg"
-            ></span>
-          </div>
-
-          <!-- タスク表示エリア -->
-          <div id="taskDisplayArea" class="mb-4 hidden">
-            <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 dark:border-blue-400 p-3 rounded">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">この時間でやること</p>
-              <p id="taskText" class="font-medium text-gray-800 dark:text-gray-200"></p>
-            </div>
-          </div>
-
-          <!-- タイマー表示 -->
-          <div class="text-center mb-6">
-            <!-- プログレスサークルとタイマー -->
-            <div class="relative inline-block">
-              <!-- SVGサークル -->
-              <svg class="transform -rotate-90" width="240" height="240">
-                <!-- 背景サークル -->
-                <circle
-                  cx="120"
-                  cy="120"
-                  r="100"
-                  stroke="#e5e7eb"
-                  stroke-width="12"
-                  fill="none"
-                />
-                <!-- プログレスサークル -->
-                <circle
-                  id="progressCircle"
-                  cx="120"
-                  cy="120"
-                  r="100"
-                  stroke="#93c5fd"
-                  stroke-width="12"
-                  fill="none"
-                  stroke-linecap="round"
-                  style="transition: stroke-dashoffset 0.5s ease, stroke 0.3s ease;"
-                />
-              </svg>
-              <!-- タイマー時間表示（サークルの中央） -->
-              <div class="absolute inset-0 flex items-center justify-center">
-                <div
-                  id="timerDisplay"
-                  class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white font-mono"
-                >
-                  25:00
-                </div>
-              </div>
-            </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400 mt-4">
-              サイクル: <span id="cycleCount">1</span>
-            </div>
-          </div>
-
-          <!-- コントロールボタン -->
-          <div class="flex flex-col sm:flex-row gap-3 mb-4">
-            <button
-              id="startButton"
-              onclick="startTimer()"
-              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
-            >
-              ▶ 開始
-            </button>
-            <button
-              id="pauseButton"
-              onclick="pauseTimer()"
-              class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200 hidden"
-            >
-              ⏸ 一時停止
-            </button>
-            <button
-              onclick="resetTimer()"
-              class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
-            >
-              🔄 リセット
-            </button>
-          </div>
-
-          <!-- 次のセッション表示 -->
-          <div class="text-center text-sm text-gray-600 dark:text-gray-400">
-            次: <span id="nextSession"></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- フッター -->
-      <div class="text-center mt-4 text-gray-600 dark:text-gray-400 text-sm">
-        <span id="footerText">作業25分 → 休憩5分を繰り返します</span>
-      </div>
+    <style>
+        .timer-circle {
+            transform: rotate(-90deg);
+        }
+        .dark {
+            color-scheme: dark;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-200">
+    <!-- 設定ボタン -->
+    <div class="fixed top-4 right-4 z-10">
+        <button id="settingsBtn" class="p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-shadow">
+            ⚙️
+        </button>
     </div>
 
-    <!-- タスク入力モーダル -->
-    <div id="taskModal" class="hidden fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-start justify-center p-4 z-50 overflow-y-auto" onclick="handleModalBackgroundClick(event)">
-      <div id="taskModalContent" class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full my-auto transition-transform duration-300" onclick="event.stopPropagation()">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">この時間でやること</h2>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">タスクを入力してください（任意）<span class="text-xs ml-2">(Escキーでスキップ)</span></p>
-        <input
-          type="text"
-          id="modalTaskInput"
-          placeholder="例: レポート作成、コーディング、資料読み込み..."
-          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-6"
-          onkeydown="handleModalKeyDown(event)"
-          onfocus="handleInputFocus()"
-          onblur="handleInputBlur()"
-        />
-        <button
-          onclick="confirmTask()"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
-        >
-          ✓ 確定して開始
-        </button>
-      </div>
+    <!-- 設定モーダル -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h2 class="text-xl font-bold mb-4">設定</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">作業時間（分）</label>
+                    <input type="number" id="workDuration" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700" min="1" max="60" value="25">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">休憩時間（分）</label>
+                    <input type="number" id="breakDuration" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700" min="1" max="30" value="5">
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium">ダークモード</label>
+                    <button id="darkModeToggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform dark:translate-x-6"></span>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between pt-4">
+                    <span class="text-sm text-gray-500">デバッグモード</span>
+                    <button id="debugModeToggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-6">
+                <button id="saveSettings" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">保存</button>
+                <button id="cancelSettings" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <!-- トップ画面 -->
+        <div id="topScreen" class="text-center">
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold mb-2">🍅</h1>
+                <h2 class="text-2xl font-bold">ポモドーロタイマー</h2>
+            </div>
+
+            <div class="space-y-4">
+                <button id="startWorkBtn" class="w-full bg-red-500 text-white py-4 px-6 rounded-lg text-lg font-semibold hover:bg-red-600 transition-colors shadow-lg">
+                    作業を開始
+                </button>
+                <button id="startBreakBtn" class="w-full bg-green-500 text-white py-4 px-6 rounded-lg text-lg font-semibold hover:bg-green-600 transition-colors shadow-lg">
+                    休憩を開始
+                </button>
+            </div>
+        </div>
+
+        <!-- 作業画面 -->
+        <div id="workScreen" class="hidden text-center">
+            <h2 class="text-2xl font-bold mb-6">🍅 作業中</h2>
+
+            <!-- タイマー表示 -->
+            <div class="relative w-64 h-64 mx-auto mb-8">
+                <button id="workTimerBtn" class="absolute inset-0 w-full h-full rounded-full hover:bg-gray-500 hover:bg-opacity-5 dark:hover:bg-gray-800 dark:hover:bg-opacity-30 transition-colors">
+                    <svg class="w-full h-full timer-circle" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                        <circle id="workProgress" cx="50" cy="50" r="45" fill="none" stroke="#ef4444" stroke-width="8"
+                                stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span id="workTimeDisplay" class="text-3xl font-bold">25:00</span>
+                        <div id="workStatusDisplay" class="text-sm text-gray-500 mt-1">一時停止中</div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- タスク管理 -->
+            <div class="text-left space-y-6">
+                <div>
+                    <h3 class="font-semibold mb-2">この作業でやること</h3>
+                    <div id="currentTasks" class="space-y-2"></div>
+                    <button id="addCurrentTask" class="text-blue-500 hover:text-blue-600 text-sm">+ タスクを追加</button>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-2">次の作業でやること</h3>
+                    <div id="nextTasks" class="space-y-2"></div>
+                    <button id="addNextTask" class="text-blue-500 hover:text-blue-600 text-sm">+ タスクを追加</button>
+                </div>
+            </div>
+
+            <button id="resetFromWork" class="w-full mt-8 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors">
+                リセット
+            </button>
+        </div>
+
+        <!-- 休憩画面 -->
+        <div id="breakScreen" class="hidden text-center">
+            <h2 class="text-2xl font-bold mb-6">☕ 休憩中</h2>
+
+            <!-- タイマー表示 -->
+            <div class="relative w-64 h-64 mx-auto mb-8">
+                <button id="breakTimerBtn" class="absolute inset-0 w-full h-full rounded-full hover:bg-gray-500 hover:bg-opacity-5 dark:hover:bg-gray-800 dark:hover:bg-opacity-30 transition-colors">
+                    <svg class="w-full h-full timer-circle" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                        <circle id="breakProgress" cx="50" cy="50" r="45" fill="none" stroke="#10b981" stroke-width="8"
+                                stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span id="breakTimeDisplay" class="text-3xl font-bold">05:00</span>
+                        <div id="breakStatusDisplay" class="text-sm text-gray-500 mt-1">動作中</div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- タスク管理 -->
+            <div class="text-left space-y-6">
+                <div>
+                    <h3 class="font-semibold mb-2">次の作業でやること</h3>
+                    <div id="nextTasksBreak" class="space-y-2"></div>
+                    <button id="addNextTaskBreak" class="text-blue-500 hover:text-blue-600 text-sm">+ タスクを追加</button>
+                </div>
+            </div>
+
+            <button id="resetFromBreak" class="w-full mt-8 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors">
+                リセット
+            </button>
+        </div>
     </div>
 
     <script>
-      // ダークモード管理
-      function initTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // グローバル変数
+        let currentScreen = 'top';
+        let timer = null;
+        let timeLeft = 0;
+        let isRunning = false;
+        let wakeLock = null;
+        let workDuration = 25;
+        let breakDuration = 5;
+        let debugMode = false;
 
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-          document.documentElement.classList.add('dark');
-          updateThemeIcon(true);
-        } else {
-          document.documentElement.classList.remove('dark');
-          updateThemeIcon(false);
-        }
-      }
+        // タスク管理
+        let currentTasks = [];
+        let nextTasks = [];
 
-      function toggleTheme() {
-        const isDark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        updateThemeIcon(isDark);
-      }
+        // DOM要素
+        const screens = {
+            top: document.getElementById('topScreen'),
+            work: document.getElementById('workScreen'),
+            break: document.getElementById('breakScreen')
+        };
 
-      function updateThemeIcon(isDark) {
-        const icon = document.getElementById('themeIcon');
-        icon.textContent = isDark ? '☀️' : '🌙';
-      }
-
-      // デバッグモード管理
-      function toggleDebugMode() {
-        isDebugMode = !isDebugMode;
-        updateDebugIcon();
-        updateDebugUI();
-      }
-
-      function updateDebugIcon() {
-        const icon = document.getElementById('debugIcon');
-        icon.textContent = isDebugMode ? '🐛' : '🔧';
-      }
-
-      function updateDebugUI() {
-        const workButtonText = document.getElementById('workButtonText');
-        const breakButtonText = document.getElementById('breakButtonText');
-        const footerText = document.getElementById('footerText');
-
-        if (isDebugMode) {
-          workButtonText.textContent = '🎯 作業から開始 (10秒)';
-          breakButtonText.textContent = '☕ 休憩から開始 (5秒)';
-          footerText.textContent = 'デバッグモード: 作業10秒 → 休憩5秒';
-        } else {
-          workButtonText.textContent = '🎯 作業から開始 (25分)';
-          breakButtonText.textContent = '☕ 休憩から開始 (5分)';
-          footerText.textContent = '作業25分 → 休憩5分を繰り返します';
-        }
-      }
-
-      function getWorkTime() {
-        return isDebugMode ? DEBUG_WORK_TIME : WORK_TIME;
-      }
-
-      function getBreakTime() {
-        return isDebugMode ? DEBUG_BREAK_TIME : BREAK_TIME;
-      }
-
-      // Screen Wake Lock管理
-      async function requestWakeLock() {
-        try {
-          if ('wakeLock' in navigator) {
-            wakeLock = await navigator.wakeLock.request('screen');
-            console.log('Wake Lock有効化');
-
-            wakeLock.addEventListener('release', () => {
-              console.log('Wake Lock解除');
-            });
-          }
-        } catch (error) {
-          console.warn('Wake Lock取得に失敗:', error);
-        }
-      }
-
-      async function releaseWakeLock() {
-        if (wakeLock) {
-          try {
-            await wakeLock.release();
-            wakeLock = null;
-            console.log('Wake Lock手動解除');
-          } catch (error) {
-            console.warn('Wake Lock解除に失敗:', error);
-          }
-        }
-      }
-
-      // ページの可視性変更時にWake Lockを再取得
-      document.addEventListener('visibilitychange', async () => {
-        if (wakeLock !== null && document.visibilityState === 'visible' && isRunning) {
-          await requestWakeLock();
-        }
-      });
-
-      // キーボード表示/非表示の検出とモーダル位置調整
-      function setupKeyboardHandling() {
-        // Visual Viewport APIを使用（サポートされている場合）
-        if (window.visualViewport) {
-          window.visualViewport.addEventListener('resize', handleViewportResize);
-        } else {
-          // フォールバック: windowのresizeイベント
-          window.addEventListener('resize', handleViewportResize);
-        }
-      }
-
-      function handleViewportResize() {
-        const taskModal = document.getElementById('taskModal');
-        const modalContent = document.getElementById('taskModalContent');
-
-        if (!taskModal.classList.contains('hidden')) {
-          const viewport = window.visualViewport || window;
-          const viewportHeight = viewport.height || window.innerHeight;
-          const windowHeight = window.screen.height;
-
-          // キーボードが表示されているかを判定（ビューポートが大幅に小さくなった場合）
-          const heightRatio = viewportHeight / windowHeight;
-          const wasKeyboardVisible = keyboardVisible;
-          keyboardVisible = heightRatio < 0.75; // 75%以下になったらキーボード表示と判定
-
-          if (keyboardVisible && !wasKeyboardVisible) {
-            // キーボード表示開始
-            adjustModalForKeyboard();
-          } else if (!keyboardVisible && wasKeyboardVisible) {
-            // キーボード非表示
-            resetModalPosition();
-          }
-        }
-      }
-
-      function adjustModalForKeyboard() {
-        const taskModal = document.getElementById('taskModal');
-        const modalContent = document.getElementById('taskModalContent');
-        const input = document.getElementById('modalTaskInput');
-
-        // モーダルを上部に配置
-        taskModal.classList.remove('items-start');
-        taskModal.classList.add('items-start');
-        modalContent.classList.remove('my-auto');
-        modalContent.classList.add('mt-4');
-
-        // 入力欄が見えるように調整
-        setTimeout(() => {
-          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      }
-
-      function resetModalPosition() {
-        const taskModal = document.getElementById('taskModal');
-        const modalContent = document.getElementById('taskModalContent');
-
-        // モーダル位置をリセット
-        taskModal.classList.remove('items-start');
-        taskModal.classList.add('items-start');
-        modalContent.classList.remove('mt-4');
-        modalContent.classList.add('my-auto');
-      }
-
-      // 入力フィールドのフォーカス・ブラー処理
-      function handleInputFocus() {
-        // フォーカス時は少し遅延してからスクロール調整
-        setTimeout(() => {
-          const input = document.getElementById('modalTaskInput');
-          if (input) {
-            input.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-          }
-        }, 300);
-      }
-
-      function handleInputBlur() {
-        // ブラー時は特に何もしない（キーボードが閉じるのを待つ）
-      }
-
-      // ページ読み込み時にテーマを初期化
-      initTheme();
-
-      // キーボード処理の初期化
-      setupKeyboardHandling();
-
-      // Service Workerの登録（PWA対応）
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/pomodoro-timer/service-worker.js')
-            .then((registration) => {
-              console.log('Service Worker登録成功:', registration.scope);
-            })
-            .catch((error) => {
-              console.log('Service Worker登録失敗:', error);
-            });
+        // 初期化
+        document.addEventListener('DOMContentLoaded', async () => {
+            loadSettings();
+            setupEventListeners();
+            setupServiceWorker();
+            showScreen('top');
         });
-      }
 
-      // タイマーの状態
-      let timerInterval = null;
-      let timeLeft = 25 * 60; // 秒単位
-      let isRunning = false;
-      let currentMode = 'work'; // 'work' or 'break'
-      let cycleCount = 1;
-      let currentTask = ''; // 現在のタスク
-      let isDebugMode = false; // デバッグモード
-      let wakeLock = null; // Screen Wake Lock
-      let keyboardVisible = false; // キーボード表示状態
-      let originalModalPosition = null; // モーダルの元の位置
+        // 設定の読み込み
+        function loadSettings() {
+            const savedWorkDuration = localStorage.getItem('workDuration');
+            const savedBreakDuration = localStorage.getItem('breakDuration');
+            const savedDarkMode = localStorage.getItem('darkMode');
+            const savedDebugMode = localStorage.getItem('debugMode');
+            const savedCurrentTasks = localStorage.getItem('currentTasks');
+            const savedNextTasks = localStorage.getItem('nextTasks');
 
-      const WORK_TIME = 25 * 60; // 25分
-      const BREAK_TIME = 5 * 60; // 5分
-      const DEBUG_WORK_TIME = 10; // デバッグ: 10秒
-      const DEBUG_BREAK_TIME = 5; // デバッグ: 5秒
-      const PROGRESS_RADIUS = 100; // プログレスサークルの半径
-
-      // AudioContextを再利用（メモリリーク防止）
-      let audioContext = null;
-
-      // 音声を再生する関数（Web Audio APIを使用）
-      function playSound() {
-        try {
-          if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          }
-
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-
-          oscillator.frequency.value = 800; // 周波数
-          oscillator.type = 'sine';
-
-          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-          oscillator.start(audioContext.currentTime);
-          oscillator.stop(audioContext.currentTime + 0.5);
-        } catch (error) {
-          console.warn('音声再生に失敗しました:', error);
-        }
-      }
-
-      // モーダルを表示
-      function showTaskModal() {
-        const modal = document.getElementById('taskModal');
-        const modalInput = document.getElementById('modalTaskInput');
-        modal.classList.remove('hidden');
-        modalInput.value = '';
-
-        // キーボード状態をリセット
-        keyboardVisible = false;
-        resetModalPosition();
-
-        // 少し遅延してからフォーカス（iOS対応）
-        setTimeout(() => {
-          modalInput.focus();
-        }, 100);
-      }
-
-      // モーダルを非表示
-      function hideTaskModal() {
-        document.getElementById('taskModal').classList.add('hidden');
-        // キーボード状態をリセット
-        keyboardVisible = false;
-      }
-
-      // モーダルのキーボードイベント処理
-      function handleModalKeyDown(event) {
-        if (event.key === 'Enter') {
-          confirmTask();
-        } else if (event.key === 'Escape') {
-          // Escキーでスキップ（タスクなしで開始）
-          confirmTask();
-        }
-      }
-
-      // モーダル背景クリックで閉じる
-      function handleModalBackgroundClick(event) {
-        if (event.target.id === 'taskModal') {
-          confirmTask(); // タスクなしで開始
-        }
-      }
-
-      // タスクを確定してタイマーを開始
-      function confirmTask() {
-        const modalInput = document.getElementById('modalTaskInput');
-        currentTask = modalInput.value.trim();
-        hideTaskModal();
-
-        // タスク表示を更新
-        if (currentTask) {
-          document.getElementById('taskText').textContent = currentTask;
-          document.getElementById('taskDisplayArea').classList.remove('hidden');
-        } else {
-          document.getElementById('taskDisplayArea').classList.add('hidden');
-        }
-
-        // タイマーを自動開始
-        startTimer();
-      }
-
-
-      // タイマー初期化（共通処理）
-      function initializeTimer(mode) {
-        currentMode = mode;
-        timeLeft = mode === 'work' ? getWorkTime() : getBreakTime();
-        document.getElementById('initialChoice').classList.add('hidden');
-        document.getElementById('timerView').classList.remove('hidden');
-        updateDisplay();
-        playSound();
-      }
-
-      // 作業から開始
-      function startWithWork() {
-        initializeTimer('work');
-        showTaskModal();
-      }
-
-      // 休憩から開始
-      function startWithBreak() {
-        initializeTimer('break');
-        startTimer();
-      }
-
-      // タイマー開始
-      function startTimer() {
-        if (!isRunning) {
-          isRunning = true;
-          document.getElementById('startButton').classList.add('hidden');
-          document.getElementById('pauseButton').classList.remove('hidden');
-
-          // Wake Lockを有効化
-          requestWakeLock();
-
-          timerInterval = setInterval(() => {
-            timeLeft--;
-
-            if (timeLeft <= 0) {
-              switchMode();
-            } else {
-              updateTimerDisplay();
+            if (savedWorkDuration) {
+                workDuration = parseInt(savedWorkDuration);
+                document.getElementById('workDuration').value = workDuration;
             }
-          }, 1000);
-        }
-      }
 
-      // タイマー一時停止
-      function pauseTimer() {
-        isRunning = false;
-        if (timerInterval) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-        }
-        document.getElementById('startButton').classList.remove('hidden');
-        document.getElementById('pauseButton').classList.add('hidden');
+            if (savedBreakDuration) {
+                breakDuration = parseInt(savedBreakDuration);
+                document.getElementById('breakDuration').value = breakDuration;
+            }
 
-        // Wake Lockを解除
-        releaseWakeLock();
-      }
+            if (savedDebugMode === 'true') {
+                debugMode = true;
+                document.getElementById('debugModeToggle').classList.add('bg-gray-600');
+                document.getElementById('debugModeToggle').querySelector('span').classList.add('translate-x-6');
+                workDuration = 0.1; // 6秒
+                breakDuration = 0.05; // 3秒
+            }
 
-      // タイマーリセット
-      function resetTimer() {
-        pauseTimer();
-        // Wake Lockを確実に解除
-        releaseWakeLock();
+            if (savedDarkMode === 'true') {
+                document.documentElement.classList.add('dark');
+                updateDarkModeToggle(true);
+            }
 
-        // タイマービューを非表示にして初期選択画面を表示
-        document.getElementById('timerView').classList.add('hidden');
-        document.getElementById('initialChoice').classList.remove('hidden');
-        // 状態をリセット
-        cycleCount = 1;
-        timeLeft = getWorkTime();
-        currentMode = 'work';
-        currentTask = '';
-        // タスク表示をクリア
-        document.getElementById('taskDisplayArea').classList.add('hidden');
-      }
+            if (savedCurrentTasks) {
+                currentTasks = JSON.parse(savedCurrentTasks);
+            }
 
-      // モード切り替え
-      function switchMode() {
-        playSound(); // 音を鳴らす
+            if (savedNextTasks) {
+                nextTasks = JSON.parse(savedNextTasks);
+            }
 
-        if (currentMode === 'work') {
-          // 作業→休憩
-          currentMode = 'break';
-          timeLeft = getBreakTime();
-          updateDisplay();
-          // 休憩は自動継続（モーダルなし）
-        } else {
-          // 休憩→作業
-          pauseTimer(); // タイマーを一時停止
-          currentMode = 'work';
-          timeLeft = getWorkTime();
-          cycleCount++;
-          // 新しい作業セッションのためにタスクをリセット
-          currentTask = '';
-          document.getElementById('taskDisplayArea').classList.add('hidden');
-          updateDisplay();
-          // モーダルを表示してタスク入力（確定時にタイマー開始）
-          showTaskModal();
-        }
-      }
-
-      // プログレスサークルの初期化（一度だけ実行）
-      let progressCircleInitialized = false;
-      function initProgressCircle() {
-        if (!progressCircleInitialized) {
-          const progressCircle = document.getElementById('progressCircle');
-          const circumference = 2 * Math.PI * PROGRESS_RADIUS;
-          progressCircle.style.strokeDasharray = circumference;
-          progressCircleInitialized = true;
-        }
-      }
-
-      // タイマー表示のみ更新（パフォーマンス最適化）
-      function updateTimerDisplay() {
-        // 時間表示
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        document.getElementById('timerDisplay').textContent =
-          `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-        // プログレスサークル更新
-        const progressCircle = document.getElementById('progressCircle');
-        const circumference = 2 * Math.PI * PROGRESS_RADIUS;
-        const totalTime = currentMode === 'work' ? getWorkTime() : getBreakTime();
-        const progress = timeLeft / totalTime;
-        const offset = circumference * progress;
-        progressCircle.style.strokeDashoffset = offset;
-      }
-
-      // 全体の表示更新（モード切替時など）
-      function updateDisplay() {
-        // プログレスサークルの初期化
-        initProgressCircle();
-
-        // タイマー表示を更新
-        updateTimerDisplay();
-
-        // モード表示
-        const modeDisplay = document.getElementById('modeDisplay');
-        const taskDisplayArea = document.getElementById('taskDisplayArea');
-        const progressCircle = document.getElementById('progressCircle');
-
-        if (currentMode === 'work') {
-          modeDisplay.textContent = '🎯 作業時間';
-          modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-red-500';
-          progressCircle.style.stroke = '#ef4444'; // 赤色（作業時間）
-          // タスクがある場合のみ表示
-          if (currentTask) {
-            taskDisplayArea.classList.remove('hidden');
-          }
-        } else {
-          modeDisplay.textContent = '☕ 休憩時間';
-          modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-green-600';
-          progressCircle.style.stroke = '#16a34a'; // 緑色（休憩時間）
-          taskDisplayArea.classList.add('hidden');
+            renderTasks();
         }
 
-        // 次のセッション
-        const nextSessionText = isDebugMode
-          ? (currentMode === 'work' ? '休憩 (5秒)' : '作業 (10秒)')
-          : (currentMode === 'work' ? '休憩 (5分)' : '作業 (25分)');
-        document.getElementById('nextSession').textContent = nextSessionText;
+        // 設定の保存
+        function saveSettings() {
+            localStorage.setItem('workDuration', workDuration);
+            localStorage.setItem('breakDuration', breakDuration);
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+            localStorage.setItem('debugMode', debugMode);
+            localStorage.setItem('currentTasks', JSON.stringify(currentTasks));
+            localStorage.setItem('nextTasks', JSON.stringify(nextTasks));
+        }
 
-        // サイクル数
-        document.getElementById('cycleCount').textContent = cycleCount;
-      }
+        // イベントリスナーの設定
+        function setupEventListeners() {
+            // 設定モーダル
+            document.getElementById('settingsBtn').addEventListener('click', openSettings);
+            document.getElementById('saveSettings').addEventListener('click', saveSettingsModal);
+            document.getElementById('cancelSettings').addEventListener('click', closeSettings);
+            document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
+            document.getElementById('debugModeToggle').addEventListener('click', toggleDebugMode);
+
+            // 画面遷移
+            document.getElementById('startWorkBtn').addEventListener('click', () => startWork());
+            document.getElementById('startBreakBtn').addEventListener('click', () => startBreak());
+            document.getElementById('resetFromWork').addEventListener('click', resetToTop);
+            document.getElementById('resetFromBreak').addEventListener('click', resetToTop);
+
+            // タイマー制御
+            document.getElementById('workTimerBtn').addEventListener('click', toggleWorkTimer);
+            document.getElementById('breakTimerBtn').addEventListener('click', toggleBreakTimer);
+
+            // タスク管理
+            document.getElementById('addCurrentTask').addEventListener('click', () => addTask('current'));
+            document.getElementById('addNextTask').addEventListener('click', () => addTask('next'));
+            document.getElementById('addNextTaskBreak').addEventListener('click', () => addTask('next'));
+
+            // モーダル外クリックで閉じる
+            document.getElementById('settingsModal').addEventListener('click', (e) => {
+                if (e.target.id === 'settingsModal') {
+                    closeSettings();
+                }
+            });
+        }
+
+        // サービスワーカーの設定
+        async function setupServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.register('service-worker.js');
+                } catch (error) {
+                    console.log('Service Worker registration failed:', error);
+                }
+            }
+        }
+
+        // 画面表示制御
+        function showScreen(screenName) {
+            Object.values(screens).forEach(screen => screen.classList.add('hidden'));
+            screens[screenName].classList.remove('hidden');
+            currentScreen = screenName;
+        }
+
+        // 作業開始
+        function startWork() {
+            showScreen('work');
+            timeLeft = debugMode ? 6 : workDuration * 60; // デバッグモードは6秒
+            updateWorkDisplay();
+            updateTimerStatus();
+            renderTasks();
+        }
+
+        // 休憩開始
+        function startBreak() {
+            showScreen('break');
+            timeLeft = debugMode ? 3 : breakDuration * 60; // デバッグモードは3秒
+            updateBreakDisplay();
+            updateTimerStatus();
+            renderTasks();
+            startTimer('break');
+            playSound();
+            requestWakeLock();
+        }
+
+        // タイマー開始/停止
+        function toggleWorkTimer() {
+            if (isRunning) {
+                stopTimer();
+            } else {
+                startTimer('work');
+                playSound();
+                requestWakeLock();
+            }
+        }
+
+        function toggleBreakTimer() {
+            if (isRunning) {
+                stopTimer();
+            } else {
+                startTimer('break');
+            }
+        }
+
+        // タイマー制御
+        function startTimer(type) {
+            if (isRunning) return;
+
+            isRunning = true;
+            updateTimerStatus();
+            timer = setInterval(() => {
+                timeLeft--;
+
+                if (type === 'work') {
+                    updateWorkDisplay();
+                } else {
+                    updateBreakDisplay();
+                }
+
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    if (type === 'work') {
+                        // 作業終了 -> 休憩開始
+                        playSound();
+                        showScreen('break');
+                        timeLeft = debugMode ? 3 : breakDuration * 60;
+                        updateBreakDisplay();
+                        startTimer('break');
+                    } else {
+                        // 休憩終了 -> 作業画面（一時停止状態）
+                        playSound();
+                        clearCurrentTasks();
+                        moveNextTasksToCurrent();
+                        showScreen('work');
+                        timeLeft = debugMode ? 6 : workDuration * 60;
+                        updateWorkDisplay();
+                        updateTimerStatus();
+                        renderTasks();
+                        releaseWakeLock();
+                    }
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            isRunning = false;
+            updateTimerStatus();
+        }
+
+        // 表示更新
+        function updateWorkDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('workTimeDisplay').textContent =
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            const totalTime = debugMode ? 6 : workDuration * 60;
+            const progress = (totalTime - timeLeft) / totalTime;
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (progress * circumference);
+            document.getElementById('workProgress').style.strokeDashoffset = offset;
+        }
+
+        function updateTimerStatus() {
+            if (currentScreen === 'work') {
+                const statusElement = document.getElementById('workStatusDisplay');
+                statusElement.textContent = isRunning ? '動作中' : '一時停止中';
+                statusElement.className = isRunning ? 'text-sm text-green-600 mt-1' : 'text-sm text-gray-500 mt-1';
+            } else if (currentScreen === 'break') {
+                const statusElement = document.getElementById('breakStatusDisplay');
+                statusElement.textContent = isRunning ? '動作中' : '一時停止中';
+                statusElement.className = isRunning ? 'text-sm text-green-600 mt-1' : 'text-sm text-gray-500 mt-1';
+            }
+        }
+
+        function updateBreakDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('breakTimeDisplay').textContent =
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            const totalTime = debugMode ? 3 : breakDuration * 60;
+            const progress = (totalTime - timeLeft) / totalTime;
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (progress * circumference);
+            document.getElementById('breakProgress').style.strokeDashoffset = offset;
+        }
+
+        // 音の再生
+        function playSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Wake Lock
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log('Wake Lock failed:', err);
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        // リセット
+        function resetToTop() {
+            stopTimer();
+            releaseWakeLock();
+            saveSettings();
+            showScreen('top');
+        }
+
+        // 設定モーダル
+        function openSettings() {
+            document.getElementById('workDuration').value = debugMode ? 25 : workDuration;
+            document.getElementById('breakDuration').value = debugMode ? 5 : breakDuration;
+            document.getElementById('settingsModal').classList.remove('hidden');
+            document.getElementById('settingsModal').classList.add('flex');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+            document.getElementById('settingsModal').classList.remove('flex');
+        }
+
+        function saveSettingsModal() {
+            if (!debugMode) {
+                workDuration = parseInt(document.getElementById('workDuration').value);
+                breakDuration = parseInt(document.getElementById('breakDuration').value);
+            }
+            saveSettings();
+            closeSettings();
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            updateDarkModeToggle(document.documentElement.classList.contains('dark'));
+        }
+
+        function updateDarkModeToggle(isDark) {
+            const toggle = document.getElementById('darkModeToggle');
+            const span = toggle.querySelector('span');
+
+            if (isDark) {
+                toggle.classList.add('bg-blue-600');
+                toggle.classList.remove('bg-gray-200');
+                span.classList.add('translate-x-6');
+            } else {
+                toggle.classList.remove('bg-blue-600');
+                toggle.classList.add('bg-gray-200');
+                span.classList.remove('translate-x-6');
+            }
+        }
+
+        function toggleDebugMode() {
+            debugMode = !debugMode;
+            const toggle = document.getElementById('debugModeToggle');
+            const span = toggle.querySelector('span');
+
+            if (debugMode) {
+                toggle.classList.add('bg-gray-600');
+                toggle.classList.remove('bg-gray-200');
+                span.classList.add('translate-x-6');
+                workDuration = 0.1; // 6秒
+                breakDuration = 0.05; // 3秒
+            } else {
+                toggle.classList.remove('bg-gray-600');
+                toggle.classList.add('bg-gray-200');
+                span.classList.remove('translate-x-6');
+                workDuration = parseInt(document.getElementById('workDuration').value);
+                breakDuration = parseInt(document.getElementById('breakDuration').value);
+            }
+        }
+
+        // タスク管理
+        function addTask(type) {
+            const taskText = prompt('タスクを入力してください:');
+            if (!taskText) return;
+
+            const task = {
+                id: Date.now(),
+                text: taskText,
+                completed: false
+            };
+
+            if (type === 'current') {
+                currentTasks.push(task);
+            } else {
+                nextTasks.push(task);
+            }
+
+            renderTasks();
+            saveSettings();
+        }
+
+        function toggleTask(type, id) {
+            const tasks = type === 'current' ? currentTasks : nextTasks;
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                renderTasks();
+                saveSettings();
+            }
+        }
+
+        function editTask(type, id) {
+            const tasks = type === 'current' ? currentTasks : nextTasks;
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                const newText = prompt('タスクを編集:', task.text);
+                if (newText !== null) {
+                    task.text = newText;
+                    renderTasks();
+                    saveSettings();
+                }
+            }
+        }
+
+        function deleteTask(type, id) {
+            if (type === 'current') {
+                currentTasks = currentTasks.filter(t => t.id !== id);
+            } else {
+                nextTasks = nextTasks.filter(t => t.id !== id);
+            }
+            renderTasks();
+            saveSettings();
+        }
+
+        function renderTasks() {
+            renderTaskList('currentTasks', currentTasks, 'current');
+            renderTaskList('nextTasks', nextTasks, 'next');
+            renderTaskList('nextTasksBreak', nextTasks, 'next');
+        }
+
+        function renderTaskList(containerId, tasks, type) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            tasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-700 rounded';
+
+                taskElement.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''}
+                           onchange="toggleTask('${type}', ${task.id})"
+                           class="rounded">
+                    <span class="flex-1 ${task.completed ? 'line-through text-gray-500' : ''}">${task.text}</span>
+                    <button onclick="editTask('${type}', ${task.id})" class="text-blue-500 hover:text-blue-600">✏️</button>
+                    <button onclick="deleteTask('${type}', ${task.id})" class="text-red-500 hover:text-red-600">🗑️</button>
+                `;
+
+                container.appendChild(taskElement);
+            });
+        }
+
+        function moveNextTasksToCurrent() {
+            currentTasks = [...nextTasks];
+            nextTasks = [];
+            renderTasks();
+            saveSettings();
+        }
+
+        function clearCurrentTasks() {
+            currentTasks = [];
+            renderTasks();
+            saveSettings();
+        }
+
+        // ページ離脱時の処理
+        window.addEventListener('beforeunload', () => {
+            releaseWakeLock();
+            saveSettings();
+        });
+
+        // ページ表示復帰時の処理
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isRunning) {
+                requestWakeLock();
+            }
+        });
     </script>
-  </body>
+</body>
 </html>

@@ -1,13 +1,14 @@
 {
   "name": "ポモドーロタイマー",
   "short_name": "ポモドーロ",
-  "description": "25分の作業と5分の休憩を繰り返すシンプルなポモドーロタイマー",
-  "start_url": "/pomodoro-timer/",
-  "scope": "/pomodoro-timer/",
+  "description": "シンプルで使いやすいポモドーロタイマー",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
   "theme_color": "#ef4444",
-  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "ja",
   "icons": [
     {
       "src": "https://emojicdn.elk.sh/🍅?size=72",
@@ -55,9 +56,9 @@
       "src": "https://emojicdn.elk.sh/🍅?size=512",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "categories": ["productivity", "utilities"],
-  "lang": "ja"
+  "screenshots": []
 }
