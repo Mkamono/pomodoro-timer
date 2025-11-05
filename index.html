@@ -155,20 +155,12 @@
           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-6"
           onkeypress="if(event.key === 'Enter') confirmTask()"
         />
-        <div class="flex gap-3">
-          <button
-            onclick="confirmTask()"
-            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
-          >
-            ✓ 確定して開始
-          </button>
-          <button
-            onclick="skipTaskInput()"
-            class="flex-1 bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
-          >
-            スキップ
-          </button>
-        </div>
+        <button
+          onclick="confirmTask()"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
+        >
+          ✓ 確定して開始
+        </button>
       </div>
     </div>
 
@@ -263,15 +255,6 @@
         startTimer();
       }
 
-      // タスク入力をスキップしてタイマーを開始
-      function skipTaskInput() {
-        currentTask = '';
-        hideTaskModal();
-        document.getElementById('taskDisplayArea').classList.add('hidden');
-
-        // タイマーを自動開始
-        startTimer();
-      }
 
       // 作業から開始
       function startWithWork() {
