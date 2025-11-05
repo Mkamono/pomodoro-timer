@@ -3,11 +3,223 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ポモドーロタイマー</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
-  <body>
-    <h1 class="text-3xl font-bold underline">
-      Hello world!
-    </h1>
+  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+      <!-- メインカード -->
+      <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+        <!-- タイトル -->
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-800">
+          ポモドーロタイマー
+        </h1>
+
+        <!-- 初期選択画面 -->
+        <div id="initialChoice" class="space-y-4">
+          <p class="text-center text-gray-600 mb-6">何から始めますか？</p>
+          <button
+            onclick="startWithWork()"
+            class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
+          >
+            🎯 作業から開始 (25分)
+          </button>
+          <button
+            onclick="startWithBreak()"
+            class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
+          >
+            ☕ 休憩から開始 (5分)
+          </button>
+        </div>
+
+        <!-- タイマー画面 -->
+        <div id="timerView" class="hidden">
+          <!-- 現在のモード表示 -->
+          <div class="text-center mb-8">
+            <span
+              id="modeDisplay"
+              class="inline-block px-6 py-2 rounded-full text-white font-bold text-lg"
+            ></span>
+          </div>
+
+          <!-- タイマー表示 -->
+          <div class="text-center mb-8">
+            <div
+              id="timerDisplay"
+              class="text-6xl md:text-7xl font-bold text-gray-800 mb-4 font-mono"
+            >
+              25:00
+            </div>
+            <div class="text-sm text-gray-500">
+              サイクル: <span id="cycleCount">1</span>
+            </div>
+          </div>
+
+          <!-- コントロールボタン -->
+          <div class="flex flex-col sm:flex-row gap-3 mb-4">
+            <button
+              id="startButton"
+              onclick="startTimer()"
+              class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
+            >
+              ▶ 開始
+            </button>
+            <button
+              id="pauseButton"
+              onclick="pauseTimer()"
+              class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl transition duration-200 hidden"
+            >
+              ⏸ 一時停止
+            </button>
+            <button
+              onclick="resetTimer()"
+              class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
+            >
+              🔄 リセット
+            </button>
+          </div>
+
+          <!-- 次のセッション表示 -->
+          <div class="text-center text-sm text-gray-600">
+            次: <span id="nextSession"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- フッター -->
+      <div class="text-center mt-6 text-gray-600 text-sm">
+        作業25分 → 休憩5分を繰り返します
+      </div>
+    </div>
+
+    <script>
+      // タイマーの状態
+      let timerInterval = null;
+      let timeLeft = 25 * 60; // 秒単位
+      let isRunning = false;
+      let currentMode = 'work'; // 'work' or 'break'
+      let cycleCount = 1;
+
+      const WORK_TIME = 25 * 60; // 25分
+      const BREAK_TIME = 5 * 60; // 5分
+
+      // 音声を再生する関数（Web Audio APIを使用）
+      function playSound() {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.value = 800; // 周波数
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      }
+
+      // 作業から開始
+      function startWithWork() {
+        currentMode = 'work';
+        timeLeft = WORK_TIME;
+        showTimerView();
+        playSound();
+      }
+
+      // 休憩から開始
+      function startWithBreak() {
+        currentMode = 'break';
+        timeLeft = BREAK_TIME;
+        showTimerView();
+        playSound();
+      }
+
+      // タイマービューを表示
+      function showTimerView() {
+        document.getElementById('initialChoice').classList.add('hidden');
+        document.getElementById('timerView').classList.remove('hidden');
+        updateDisplay();
+      }
+
+      // タイマー開始
+      function startTimer() {
+        if (!isRunning) {
+          isRunning = true;
+          document.getElementById('startButton').classList.add('hidden');
+          document.getElementById('pauseButton').classList.remove('hidden');
+
+          timerInterval = setInterval(() => {
+            timeLeft--;
+
+            if (timeLeft < 0) {
+              switchMode();
+            }
+
+            updateDisplay();
+          }, 1000);
+        }
+      }
+
+      // タイマー一時停止
+      function pauseTimer() {
+        isRunning = false;
+        clearInterval(timerInterval);
+        document.getElementById('startButton').classList.remove('hidden');
+        document.getElementById('pauseButton').classList.add('hidden');
+      }
+
+      // タイマーリセット
+      function resetTimer() {
+        pauseTimer();
+        timeLeft = currentMode === 'work' ? WORK_TIME : BREAK_TIME;
+        updateDisplay();
+      }
+
+      // モード切り替え
+      function switchMode() {
+        playSound(); // 音を鳴らす
+
+        if (currentMode === 'work') {
+          currentMode = 'break';
+          timeLeft = BREAK_TIME;
+        } else {
+          currentMode = 'work';
+          timeLeft = WORK_TIME;
+          cycleCount++;
+        }
+
+        updateDisplay();
+      }
+
+      // 表示更新
+      function updateDisplay() {
+        // 時間表示
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('timerDisplay').textContent =
+          `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        // モード表示
+        const modeDisplay = document.getElementById('modeDisplay');
+        if (currentMode === 'work') {
+          modeDisplay.textContent = '🎯 作業時間';
+          modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-red-500';
+        } else {
+          modeDisplay.textContent = '☕ 休憩時間';
+          modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-green-500';
+        }
+
+        // 次のセッション
+        document.getElementById('nextSession').textContent =
+          currentMode === 'work' ? '休憩 (5分)' : '作業 (25分)';
+
+        // サイクル数
+        document.getElementById('cycleCount').textContent = cycleCount;
+      }
+    </script>
   </body>
 </html>
