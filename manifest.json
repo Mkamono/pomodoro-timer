@@ -2,12 +2,12 @@
   "name": "ポモドーロタイマー",
   "short_name": "ポモドーロ",
   "description": "シンプルで使いやすいポモドーロタイマー",
-  "start_url": "/",
+  "start_url": "/pomodoro-timer/",
   "display": "standalone",
   "theme_color": "#ef4444",
   "background_color": "#ffffff",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "/pomodoro-timer/",
   "lang": "ja",
   "icons": [
     {

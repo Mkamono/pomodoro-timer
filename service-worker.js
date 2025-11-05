@@ -1,8 +1,8 @@
 const CACHE_NAME = 'pomodoro-timer-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  '/pomodoro-timer/',
+  '/pomodoro-timer/index.html',
+  '/pomodoro-timer/manifest.json',
   'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4',
   'https://emojicdn.elk.sh/🍅',
   'https://emojicdn.elk.sh/🍅?size=180'
