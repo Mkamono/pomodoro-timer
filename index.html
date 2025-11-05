@@ -33,13 +33,13 @@
           <p class="text-center text-gray-600 dark:text-gray-300 mb-6">何から始めますか？</p>
           <button
             onclick="startWithWork()"
-            class="w-full bg-red-300 hover:bg-red-400 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
+            class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
           >
             🎯 作業から開始 (25分)
           </button>
           <button
             onclick="startWithBreak()"
-            class="w-full bg-green-300 hover:bg-green-400 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition duration-200 transform hover:scale-105"
           >
             ☕ 休憩から開始 (5分)
           </button>
@@ -57,7 +57,7 @@
 
           <!-- タスク表示エリア -->
           <div id="taskDisplayArea" class="mb-6 hidden">
-            <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-300 dark:border-blue-300 p-4 rounded">
+            <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 dark:border-blue-400 p-4 rounded">
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">この時間でやること</p>
               <p id="taskText" class="font-medium text-gray-800 dark:text-gray-200"></p>
             </div>
@@ -111,20 +111,20 @@
             <button
               id="startButton"
               onclick="startTimer()"
-              class="flex-1 bg-blue-300 hover:bg-blue-400 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
+              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
             >
               ▶ 開始
             </button>
             <button
               id="pauseButton"
               onclick="pauseTimer()"
-              class="flex-1 bg-yellow-300 hover:bg-yellow-400 text-white font-bold py-3 px-6 rounded-xl transition duration-200 hidden"
+              class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200 hidden"
             >
               ⏸ 一時停止
             </button>
             <button
               onclick="resetTimer()"
-              class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
+              class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
             >
               🔄 リセット
             </button>
@@ -158,13 +158,13 @@
         <div class="flex gap-3">
           <button
             onclick="confirmTask()"
-            class="flex-1 bg-blue-300 hover:bg-blue-400 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
           >
             ✓ 確定して開始
           </button>
           <button
             onclick="skipTaskInput()"
-            class="flex-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-white font-bold py-3 px-6 rounded-xl transition duration-200"
+            class="flex-1 bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl transition duration-200"
           >
             スキップ
           </button>
@@ -397,16 +397,16 @@
 
         if (currentMode === 'work') {
           modeDisplay.textContent = '🎯 作業時間';
-          modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-red-300';
-          progressCircle.style.stroke = '#fca5a5'; // 淡い赤色（作業時間）
+          modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-red-500';
+          progressCircle.style.stroke = '#ef4444'; // 赤色（作業時間）
           // タスクがある場合のみ表示
           if (currentTask) {
             taskDisplayArea.classList.remove('hidden');
           }
         } else {
           modeDisplay.textContent = '☕ 休憩時間';
-          modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-green-300';
-          progressCircle.style.stroke = '#86efac'; // 淡い緑色（休憩時間）
+          modeDisplay.className = 'inline-block px-6 py-2 rounded-full text-white font-bold text-lg bg-green-600';
+          progressCircle.style.stroke = '#16a34a'; // 緑色（休憩時間）
           taskDisplayArea.classList.add('hidden');
         }
 
