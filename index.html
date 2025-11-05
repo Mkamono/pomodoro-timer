@@ -7,12 +7,12 @@
     <link rel="icon" type="image/png" href="https://emojicdn.elk.sh/🍅" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
-  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 h-[100dvh] overflow-hidden flex items-center justify-center p-4 transition-colors duration-300">
-    <div class="w-full max-w-md max-h-full overflow-y-auto">
+  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 h-[100dvh] overflow-hidden flex items-center justify-center py-2 px-4 transition-colors duration-300">
+    <div class="w-full max-w-md">
       <!-- メインカード -->
-      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 transition-colors duration-300">
+      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 md:p-12 transition-colors duration-300">
         <!-- ダークモード切り替えボタン -->
-        <div class="flex justify-end mb-4">
+        <div class="flex justify-end mb-3">
           <button
             id="themeToggle"
             onclick="toggleTheme()"
@@ -24,7 +24,7 @@
         </div>
 
         <!-- タイトル -->
-        <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-800 dark:text-white">
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800 dark:text-white">
           ポモドーロタイマー
         </h1>
 
@@ -48,7 +48,7 @@
         <!-- タイマー画面 -->
         <div id="timerView" class="hidden">
           <!-- 現在のモード表示 -->
-          <div class="text-center mb-8">
+          <div class="text-center mb-4">
             <span
               id="modeDisplay"
               class="inline-block px-6 py-2 rounded-full text-white font-bold text-lg"
@@ -56,24 +56,24 @@
           </div>
 
           <!-- タスク表示エリア -->
-          <div id="taskDisplayArea" class="mb-6 hidden">
-            <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 dark:border-blue-400 p-4 rounded">
+          <div id="taskDisplayArea" class="mb-4 hidden">
+            <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 dark:border-blue-400 p-3 rounded">
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">この時間でやること</p>
               <p id="taskText" class="font-medium text-gray-800 dark:text-gray-200"></p>
             </div>
           </div>
 
           <!-- タイマー表示 -->
-          <div class="text-center mb-8">
+          <div class="text-center mb-6">
             <!-- プログレスサークルとタイマー -->
             <div class="relative inline-block">
               <!-- SVGサークル -->
-              <svg class="transform -rotate-90" width="280" height="280">
+              <svg class="transform -rotate-90" width="240" height="240">
                 <!-- 背景サークル -->
                 <circle
-                  cx="140"
-                  cy="140"
-                  r="120"
+                  cx="120"
+                  cy="120"
+                  r="100"
                   stroke="#e5e7eb"
                   stroke-width="12"
                   fill="none"
@@ -81,9 +81,9 @@
                 <!-- プログレスサークル -->
                 <circle
                   id="progressCircle"
-                  cx="140"
-                  cy="140"
-                  r="120"
+                  cx="120"
+                  cy="120"
+                  r="100"
                   stroke="#93c5fd"
                   stroke-width="12"
                   fill="none"
@@ -95,7 +95,7 @@
               <div class="absolute inset-0 flex items-center justify-center">
                 <div
                   id="timerDisplay"
-                  class="text-5xl md:text-6xl font-bold text-gray-800 dark:text-white font-mono"
+                  class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white font-mono"
                 >
                   25:00
                 </div>
@@ -138,7 +138,7 @@
       </div>
 
       <!-- フッター -->
-      <div class="text-center mt-6 text-gray-600 dark:text-gray-400 text-sm">
+      <div class="text-center mt-4 text-gray-600 dark:text-gray-400 text-sm">
         作業25分 → 休憩5分を繰り返します
       </div>
     </div>
@@ -203,7 +203,7 @@
 
       const WORK_TIME = 25 * 60; // 25分
       const BREAK_TIME = 5 * 60; // 5分
-      const PROGRESS_RADIUS = 120; // プログレスサークルの半径
+      const PROGRESS_RADIUS = 100; // プログレスサークルの半径
 
       // AudioContextを再利用（メモリリーク防止）
       let audioContext = null;
